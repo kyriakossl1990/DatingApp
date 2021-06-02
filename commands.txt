@@ -1,0 +1,5 @@
+dotnet dev-certs https --trust
+dotnet tool install --global dotnet-ef --version 5.0.6
+dotnet ef migrations add InitialCreate -o Data/Migrations
+dotnet ef migrations remove
+dotnet ef database update
