@@ -2,6 +2,7 @@
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,11 +18,13 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly ITokenService _tokenService;
+        private readonly IMapper _mapper;
 
-        public AccountController(DataContext context, ITokenService tokenService)
+        public AccountController(DataContext context, ITokenService tokenService, IMapper mapper)
         {
             _context = context;
             _tokenService = tokenService;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -29,21 +32,22 @@ namespace API.Controllers
         {
             if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
 
+            var user = _mapper.Map<AppUser>(registerDto);
 
             using var hmah = new HMACSHA512();
 
-            var user = new AppUser
-            {
-                UserName = registerDto.Username.ToLower(),
-                PasswordHash = hmah.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSault = hmah.Key
-            };
+            user.UserName = registerDto.Username.ToLower();
+            user.PasswordHash = hmah.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+            user.PasswordSault = hmah.Key;
+
             _context.Add(user);
             await _context.SaveChangesAsync();
             return new UserDto
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user)
+                Token = _tokenService.CreateToken(user),
+                KnowAs = user.KnownAs,
+                Gender = user.Gender
             };
         }
 
@@ -51,8 +55,9 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = _context.Users
+                .Include(p => p.Photos)
                 .SingleOrDefaultAsync(u => u.UserName == loginDto.Username.ToLower()).Result;
-            
+
             if (user == null) return Unauthorized("Invalid username");
 
             using var hmah = new HMACSHA512(user.PasswordSault);
@@ -65,7 +70,10 @@ namespace API.Controllers
             return new UserDto
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user)
+                Token = _tokenService.CreateToken(user),
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
+                KnowAs = user.KnownAs,
+                Gender = user.Gender
             };
 
         }
