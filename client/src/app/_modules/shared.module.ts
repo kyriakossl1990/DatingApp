@@ -10,8 +10,9 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { NgxGalleryModule } from '@kolkov/ngx-gallery';
 import { FileUploadModule } from 'ng2-file-upload';
-import {BsDatepickerModule} from 'ngx-bootstrap/datepicker';
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { TimeagoModule } from 'ngx-timeago';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 
 @NgModule({
@@ -21,7 +22,7 @@ import { TimeagoModule } from 'ngx-timeago';
     BrowserAnimationsModule,
     BsDropdownModule.forRoot(),
     ToastrModule.forRoot({
-      positionClass:'toast-bottom-right'
+      positionClass: 'toast-bottom-right'
     }),
     TabsModule.forRoot(),
     NgxGalleryModule,
@@ -29,9 +30,10 @@ import { TimeagoModule } from 'ngx-timeago';
     BsDatepickerModule.forRoot(),
     PaginationModule.forRoot(),
     ButtonsModule.forRoot(),
-    TimeagoModule.forRoot()
+    TimeagoModule.forRoot(),
+    ModalModule.forRoot()
   ],
-  exports:[
+  exports: [
     BsDropdownModule,
     ToastrModule,
     TabsModule,
@@ -40,7 +42,8 @@ import { TimeagoModule } from 'ngx-timeago';
     BsDatepickerModule,
     PaginationModule,
     ButtonsModule,
-    TimeagoModule
+    TimeagoModule,
+    ModalModule
   ]
 })
 export class SharedModule { }

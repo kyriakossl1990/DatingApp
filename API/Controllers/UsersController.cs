@@ -31,6 +31,7 @@ namespace API.Controllers
             _photoService = photoService;
         }
 
+        //[Authorize(Roles ="Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
         {
@@ -48,6 +49,7 @@ namespace API.Controllers
             return Ok(users);
         }
 
+        //[Authorize(Roles ="Member")]
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
@@ -74,7 +76,7 @@ namespace API.Controllers
             var user = await _userRepository.GetUserByUserNameAsync(User.GetUserName());
             var result = await _photoService.AddPhotoAsync(file);
 
-            if (result.Error != null) return BadRequest(result.Error.Message);
+            if (result.Error is not null) return BadRequest(result.Error.Message);
 
             var photo = new Photo
             {
@@ -105,7 +107,7 @@ namespace API.Controllers
 
             var currentMain = user.Photos.FirstOrDefault(p => p.IsMain);
 
-            if (currentMain != null) currentMain.IsMain = false;
+            if (currentMain is not null) currentMain.IsMain = false;
             photo.IsMain = true;
 
             if (await _userRepository.SaveAllAsync()) return NoContent();
@@ -122,10 +124,10 @@ namespace API.Controllers
 
             if (photo.IsMain) return BadRequest("You can not delete your main photo");
 
-            if (photo.PublicId != null)
+            if (photo.PublicId is not null)
             {
                 var res = await _photoService.DeletePhotoAsync(photo.PublicId);
-                if (res.Error != null) return BadRequest(res.Error.Message);
+                if (res.Error is not null) return BadRequest(res.Error.Message);
             }
 
             user.Photos.Remove(photo);
